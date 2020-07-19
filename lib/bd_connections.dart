@@ -1,0 +1,94 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'Student.dart';
+
+class BDConnections {
+  //Direccion IPv4 de la computadora (Se encuentra con el comando "ipconfig")
+  static const SERVER = "http://192.168.0.108/Students/sqloperations.php";
+  static const _CREATE_TABLE_COMMAND = "CREATE_TABLE";
+  static const _SELECT_TABLE_COMMAND = "SELECT_TABLE";
+  static const _INSERT_DATA_COMMAND = "INSERT_DATA";
+
+  //TABLE CREATION
+  static Future<String> createTable() async {
+    try {
+      //Mapeamos para comparar
+      var map = Map<String, dynamic>();
+      map['action'] = _CREATE_TABLE_COMMAND;
+      //Body es lo que estamos mapeando
+      final response = await http.post(SERVER, body: map);
+      print('Table response: ${response.body}');
+
+      if (200 == response.statusCode) {
+        print(response.body.toString());
+        return response.body;
+      } else {
+        return "Error";
+      }
+    } catch (e) {
+      print("Error creating table or table already exist");
+      print(e.toString());
+      return "Error";
+    }
+  }
+
+  //Get Data from
+  static Future<List<Student>> selectData() async {
+    try {
+      //Mapeamos para comparar
+      var map = Map<String, dynamic>();
+      map['action'] = _SELECT_TABLE_COMMAND;
+      //Body es lo que estamos mapeando
+      final response = await http.post(SERVER, body: map);
+      print('SELECT response: ${response.body}');
+
+      if (200 == response.statusCode) {
+        //Mapear la lista
+        List<Student> list = parseResponse(response.body);
+        return list;
+      } else {
+      return List<Student>();
+      }
+    } catch (e) {
+      print("Error getting datafrom SQL Server");
+      print(e.toString());
+      return List<Student>();
+    }
+  }
+
+  //ParseResponse Method
+  static List<Student> parseResponse(String responseBody) {
+    final parseData = json.decode(responseBody).cast<Map<String, dynamic>>();
+    return parseData.map<Student>((json) => Student.fromJson(json)).toList();
+  }
+
+  //Insert data on Server
+  static Future<String> insertData(String first_name, String last_name1, String last_name2, String email, String phone, String matricula) async {
+    try {
+      //Mapeamos para comparar
+      var map = Map<String, dynamic>();
+      map['action'] = _INSERT_DATA_COMMAND;
+      map['first_name'] = first_name;
+      map['last_name1'] = last_name1;
+      map['last_name2'] = last_name2;
+      map['email'] = email;
+      map['phone'] = phone;
+      map['matricula'] = matricula;
+
+      //Body es lo que estamos mapeando
+      final response = await http.post(SERVER, body: map);
+      print('INSERT response: ${response.body}');
+
+      if (200 == response.statusCode) {
+        print("Sucess");
+        return response.body;
+      } else {
+        return "Error";
+      }
+    } catch (e) {
+      print("Error getting datafrom SQL Server");
+      print(e.toString());
+      return "Error";
+    }
+  }
+}
