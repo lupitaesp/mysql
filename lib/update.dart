@@ -4,15 +4,15 @@ import 'Student.dart';
 import 'package:flutter/material.dart';
 import 'bd_connections.dart';
 
-class Insert extends StatefulWidget {
-  Insert() : super();
-  final String title = "Insert Data";
+class Update extends StatefulWidget {
+  Update() : super();
+  final String title = "MySQL BD Connection";
 
   @override
   homepageState createState() => homepageState();
 }
 
-class homepageState extends State<Insert> {
+class homepageState extends State<Update> {
   List<Student> _Students;
   GlobalKey<ScaffoldState> _scaffoldKey;
   TextEditingController _firstnameConroller;
@@ -21,7 +21,7 @@ class homepageState extends State<Insert> {
   TextEditingController _emailConroller;
   TextEditingController _phoneConroller;
   TextEditingController _matriculaConroller;
-
+  TextEditingController _fotoConroller;
   Student _selectStudent;
   bool _isUpdating;
   //String _titleProgress;
@@ -40,6 +40,7 @@ class homepageState extends State<Insert> {
     _emailConroller = TextEditingController();
     _phoneConroller = TextEditingController();
     _matriculaConroller = TextEditingController();
+    _fotoConroller = TextEditingController();
     //Llamar al método que llena la DataTable
     _selectData;
   }
@@ -87,6 +88,7 @@ class homepageState extends State<Insert> {
         _emailConroller.text = "";
         _phoneConroller.text = "";
         _matriculaConroller.text = "";
+        _fotoConroller.text = "";
         //Llamar la consulta general
         _selectData;  //REFRESH LIST AFTER ADDING
         _clearValues();
@@ -155,9 +157,11 @@ class homepageState extends State<Insert> {
 
   //******************************************************************
   //************************CREATING DATA TABLE*****************************
-  /*SingleChildScrollView _body() {
+  SingleChildScrollView _body() {
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+      scrollDirection: Axis.vertical,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
       child: DataTable(
         columns: [
           DataColumn(label: Text('ID')),
@@ -261,8 +265,9 @@ class homepageState extends State<Insert> {
             ]),
         ).toList(),
       ),
+    ),
     );
-  }*/
+  }
 
   //******************************************************************
   @override
@@ -271,25 +276,14 @@ class homepageState extends State<Insert> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text("Insert Data"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: (){
-              BDConnections.createTable();
-            },),
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: (){
-              BDConnections.selectData();
-            },)
-        ],
+        title: Text("Update Data"),
       ),
       body: Container(
         child: Column(
           children: <Widget>[
             Container(
-              child: Column(children: <Widget>[
+              child: Column(
+                children: <Widget>[
                 Padding(
                   padding: EdgeInsets.all(20),
                   child: TextField(controller: _firstnameConroller,
@@ -345,18 +339,18 @@ class homepageState extends State<Insert> {
                ],
               ),
             ),
-            /*Expanded(
+            Expanded(
               child: _body(),
-            ),*/
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
         onPressed: (){
           _insertData();
         },
         child: Icon(Icons.add),
-      ),
+      ),*/
     );
   }
 }

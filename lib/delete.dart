@@ -1,18 +1,16 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'Student.dart';
 import 'package:flutter/material.dart';
 import 'bd_connections.dart';
 
-class Insert extends StatefulWidget {
-  Insert() : super();
-  final String title = "Insert Data";
+class Delete extends StatefulWidget {
+  Delete() : super();
+  final String title = "MySQL BD Connection";
 
   @override
   homepageState createState() => homepageState();
 }
 
-class homepageState extends State<Insert> {
+class homepageState extends State<Delete> {
   List<Student> _Students;
   GlobalKey<ScaffoldState> _scaffoldKey;
   TextEditingController _firstnameConroller;
@@ -21,6 +19,7 @@ class homepageState extends State<Insert> {
   TextEditingController _emailConroller;
   TextEditingController _phoneConroller;
   TextEditingController _matriculaConroller;
+  TextEditingController _fotoConroller;
 
   Student _selectStudent;
   bool _isUpdating;
@@ -40,6 +39,7 @@ class homepageState extends State<Insert> {
     _emailConroller = TextEditingController();
     _phoneConroller = TextEditingController();
     _matriculaConroller = TextEditingController();
+    _fotoConroller = TextEditingController();
     //Llamar al método que llena la DataTable
     _selectData;
   }
@@ -71,6 +71,7 @@ class homepageState extends State<Insert> {
   }
 
   //INSERT DATA
+  //AGREGAR FOTO
   _insertData() {
     if (_firstnameConroller.text.isEmpty || _lastname1Conroller.text.isEmpty || _lastname2Conroller.text.isEmpty || _emailConroller.text.isEmpty || _phoneConroller.text.isEmpty || _matriculaConroller.text.isEmpty) {
       print("Empy fields");
@@ -87,6 +88,7 @@ class homepageState extends State<Insert> {
         _emailConroller.text = "";
         _phoneConroller.text = "";
         _matriculaConroller.text = "";
+        _fotoConroller.text = "";
         //Llamar la consulta general
         _selectData;  //REFRESH LIST AFTER ADDING
         _clearValues();
@@ -155,12 +157,12 @@ class homepageState extends State<Insert> {
 
   //******************************************************************
   //************************CREATING DATA TABLE*****************************
-  /*SingleChildScrollView _body() {
+  SingleChildScrollView _body() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
         columns: [
-          DataColumn(label: Text('ID')),
+          //DataColumn(label: Text('ID')),
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Last Name 1')),
           DataColumn(label: Text('Last Name 2')),
@@ -175,7 +177,7 @@ class homepageState extends State<Insert> {
               //COMO ESTA EN EL ARCHIVO STUDENT.DART
               //ADD TAP IN ROW AND POPULATE THE TEXTFIELDS WITH THE CORRESPONDING VALUES TO UPDATE
 
-              DataCell(Text(student.id),
+              /*DataCell(Text(student.id),
               onTap: (){
                 _showValues(student);
                 // Set the selected student to update
@@ -184,7 +186,7 @@ class homepageState extends State<Insert> {
                 setState(() {
                   _isUpdating = true;
                 });
-              }),
+              }),*/
 
               DataCell(Text(student.firstName.toUpperCase()),
               onTap: (){
@@ -262,7 +264,7 @@ class homepageState extends State<Insert> {
         ).toList(),
       ),
     );
-  }*/
+  }
 
   //******************************************************************
   @override
@@ -271,7 +273,7 @@ class homepageState extends State<Insert> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text("Insert Data"),
+        title: Text("Delete Data"),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add),
@@ -288,7 +290,7 @@ class homepageState extends State<Insert> {
       body: Container(
         child: Column(
           children: <Widget>[
-            Container(
+            /*Container(
               child: Column(children: <Widget>[
                 Padding(
                   padding: EdgeInsets.all(20),
@@ -344,19 +346,19 @@ class homepageState extends State<Insert> {
                 ):Container(),
                ],
               ),
-            ),
-            /*Expanded(
-              child: _body(),
             ),*/
+            Expanded(
+              child: _body(),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
         onPressed: (){
           _insertData();
         },
         child: Icon(Icons.add),
-      ),
+      ),*/
     );
   }
 }

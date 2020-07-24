@@ -4,10 +4,12 @@ import 'Student.dart';
 
 class BDConnections {
   //Direccion IPv4 de la computadora (Se encuentra con el comando "ipconfig")
-  static const SERVER = "http://192.168.0.108/Students/sqloperations.php";
+  static const SERVER = "http://192.168.0.109/Students/sqloperations.php";
   static const _CREATE_TABLE_COMMAND = "CREATE_TABLE";
   static const _SELECT_TABLE_COMMAND = "SELECT_TABLE";
   static const _INSERT_DATA_COMMAND = "INSERT_DATA";
+  static const _UPDATE_DATA_COMMAND = "UPDATE_DATA";
+  static const _DELETE_DATA_COMMAND = "DELETE_DATA";
 
   //TABLE CREATION
   static Future<String> createTable() async {
@@ -41,7 +43,6 @@ class BDConnections {
       //Body es lo que estamos mapeando
       final response = await http.post(SERVER, body: map);
       print('SELECT response: ${response.body}');
-
       if (200 == response.statusCode) {
         //Mapear la lista
         List<Student> list = parseResponse(response.body);
@@ -62,7 +63,7 @@ class BDConnections {
     return parseData.map<Student>((json) => Student.fromJson(json)).toList();
   }
 
-  //Insert data on Server
+  //INSERT DATA ON DB
   static Future<String> insertData(String first_name, String last_name1, String last_name2, String email, String phone, String matricula) async {
     try {
       //Mapeamos para comparar
@@ -91,4 +92,61 @@ class BDConnections {
       return "Error";
     }
   }
+
+  //UPDATE DATA ON DB
+  static Future<String> updateData(String id_alumno, String first_name, String last_name1, String last_name2, String email, String phone, String matricula) async {
+    try {
+      //Mapeamos para comparar
+      var map = Map<String, dynamic>();
+      map['action'] = _UPDATE_DATA_COMMAND;
+      map['id_alumno'] = id_alumno;
+      map['first_name'] = first_name;
+      map['last_name1'] = last_name1;
+      map['last_name2'] = last_name2;
+      map['email'] = email;
+      map['phone'] = phone;
+      map['matricula'] = matricula;
+
+      //Body es lo que estamos mapeando
+      final response = await http.post(SERVER, body: map);
+      print('UPDATE response: ${response.body}');
+
+      if (200 == response.statusCode) {
+        print("Sucess");
+        return response.body;
+      } else {
+        return "Error";
+      }
+    } catch (e) {
+      print("Error getting datafrom SQL Server");
+      print(e.toString());
+      return "Error";
+    }
+  }
+
+    //UPDATE DATA ON DB
+  static Future<String> deleteData(String id_alumno) async {
+    try {
+      //Mapeamos para comparar
+      var map = Map<String, dynamic>();
+      map['action'] = _DELETE_DATA_COMMAND;
+      map['id_alumno'] = id_alumno;
+
+      //Body es lo que estamos mapeando
+      final response = await http.post(SERVER, body: map);
+      print('DELETE response: ${response.body}');
+
+      if (200 == response.statusCode) {
+        print("Sucess");
+        return response.body;
+      } else {
+        return "Error";
+      }
+    } catch (e) {
+      print("Error getting datafrom SQL Server");
+      print(e.toString());
+      return "Error";
+    }
+  }
+
 }

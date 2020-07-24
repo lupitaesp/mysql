@@ -4,6 +4,8 @@ import 'Student.dart';
 import 'package:flutter/material.dart';
 import 'bd_connections.dart';
 import 'insert.dart';
+import 'update.dart';
+import 'delete.dart';
 
 class homepage extends StatefulWidget {
   homepage() : super();
@@ -22,12 +24,18 @@ class homepageState extends State<homepage> {
   TextEditingController _emailConroller;
   TextEditingController _phoneConroller;
   TextEditingController _matriculaConroller;
-  final _scaffoldkey = GlobalKey<ScaffoldState>();
+
+  Student _selectStudent;
+  bool _isUpdating;
+  //String _titleProgress;
 
   @override
   void initState() {
     super.initState();
     _Students = [];
+    _isUpdating = false;
+    Student _selectedStudent;
+    //_titleProgress = widget.title;
     _scaffoldKey = GlobalKey();
     _firstnameConroller = TextEditingController();
     _lastname1Conroller = TextEditingController();
@@ -36,7 +44,7 @@ class homepageState extends State<homepage> {
     _phoneConroller = TextEditingController();
     _matriculaConroller = TextEditingController();
     //Llamar al método que llena la DataTable
-    _selectData();
+    _selectData;
   }
 
   //******************************************************************
@@ -47,22 +55,31 @@ class homepageState extends State<homepage> {
     _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
   }
 
-  //Crear table
+  /*UPDATE TITLE IN THE APPBAR TITLE
+  _showProgress(String message){
+    setState(() {
+      _titleProgress = message;
+    });
+  }*/
+
+  //CREATE TABLE
   _createTable() {
+    //_showProgress('Creating Table...');
     BDConnections.createTable().then((result) {
       if ('sucess' == result) {
         _showSnackBar(context, result);
+        //_showProgress(widget.title);
       }
     });
   }
 
-
-  //Add data
+  //INSERT DATA
   _insertData() {
     if (_firstnameConroller.text.isEmpty || _lastname1Conroller.text.isEmpty || _lastname2Conroller.text.isEmpty || _emailConroller.text.isEmpty || _phoneConroller.text.isEmpty || _matriculaConroller.text.isEmpty) {
       print("Empy fields");
       return;
     }
+    //_showProgress('Adding Student...');
     BDConnections.insertData(_firstnameConroller.text, _lastname1Conroller.text, _lastname2Conroller.text, _emailConroller.text, _phoneConroller.text, _matriculaConroller.text)
         .then((result) {
       if ('sucess' == result) {
@@ -74,12 +91,15 @@ class homepageState extends State<homepage> {
         _phoneConroller.text = "";
         _matriculaConroller.text = "";
         //Llamar la consulta general
-        _selectData();
+        _selectData;  //REFRESH LIST AFTER ADDING
+        _clearValues();
       }
     });
   }
 
-  _selectData() {
+  //SELECT DATA
+  get _selectData {
+    //_showSnackBar('Loading Student...');
     BDConnections.selectData().then((students) {
       setState(() {
         _Students = students;
@@ -89,38 +109,158 @@ class homepageState extends State<homepage> {
       print("size of Students ${students.length}");
     });
   }
-  void refreshList() {
+
+  //UPDATE DATA
+  _updateData(Student student){
     setState(() {
-       BDConnections.selectData();
+      _isUpdating = true;
+    });
+    //_showSnackBar('Updating Student...');
+    BDConnections.updateData(student.id, _firstnameConroller.text, _lastname1Conroller.text, _lastname2Conroller.text, _emailConroller.text, _phoneConroller.text, _matriculaConroller.text).then((result){
+      if('success' == result){
+        _selectData; //REFRESH LIST AFTER UPDATE
+        setState(() {
+          _isUpdating = false;
+        });
+        _clearValues();
+      }
     });
   }
 
-  //******************************************************************
+  //DELETE DATA 
+  _deleteData(Student student){
+    //_showSnackBar('Deleting Student...');
+    BDConnections.deleteData(student.id).then((result){
+      if('success' == result){
+        _selectData; //REFRESH LIST AFTER DELETE
+      }
+    });
+  }
 
-  //************************Creating Body*****************************
+  //CLEAR TEXTFIELD VALUES
+  _clearValues(){
+        _firstnameConroller.text = "";
+        _lastname1Conroller.text = "";
+        _lastname2Conroller.text = "";
+        _emailConroller.text = "";
+        _phoneConroller.text = "";
+        _matriculaConroller.text = "";
+  }
+
+  _showValues(Student student){
+        _firstnameConroller.text = student.firstName;
+        _lastname1Conroller.text = student.lastName1;
+        _lastname2Conroller.text = student.lastName2;
+        _emailConroller.text = student.email;
+        _phoneConroller.text = student.phone;
+        _matriculaConroller.text = student.matricula;
+  }
+
+  //******************************************************************
+  //************************CREATING DATA TABLE*****************************
   SingleChildScrollView _body() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
         columns: [
-          DataColumn(label: Text('ID')),
+          //DataColumn(label: Text('ID')),
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Last Name 1')),
           DataColumn(label: Text('Last Name 2')),
           DataColumn(label: Text('E-mail')),
           DataColumn(label: Text('Phone')),
           DataColumn(label: Text('Matricula')),
+          //SHOW A DELETE BUTTON
+          //DataColumn(label: Text('DELETE'))
         ],
         rows: _Students.map((student) => DataRow(
             cells: [
               //COMO ESTA EN EL ARCHIVO STUDENT.DART
-              DataCell(Text(student.id)),
-              DataCell(Text(student.firstName.toUpperCase())),
-              DataCell(Text(student.lastName1.toUpperCase())),
-              DataCell(Text(student.lastName2.toUpperCase())),
-              DataCell(Text(student.email.toUpperCase())),
-              DataCell(Text(student.phone.toUpperCase())),
-              DataCell(Text(student.matricula.toUpperCase())),
+              //ADD TAP IN ROW AND POPULATE THE TEXTFIELDS WITH THE CORRESPONDING VALUES TO UPDATE
+
+              /*DataCell(Text(student.id),
+              onTap: (){
+                _showValues(student);
+                // Set the selected student to update
+                _selectStudent = student;
+                // Set flag updating tu true to indicate in Update Mode
+                setState(() {
+                  _isUpdating = true;
+                });
+              }),*/
+
+              DataCell(Text(student.firstName.toUpperCase()),
+              onTap: (){
+                _showValues(student);
+                // Set the selected student to update
+                _selectStudent = student;
+                // Set flag updating tu true to indicate in Update Mode
+                setState(() {
+                  _isUpdating = true;
+                });
+              }),
+
+              DataCell(Text(student.lastName1.toUpperCase()),
+              onTap: (){
+                _showValues(student);
+                // Set the selected student to update
+                _selectStudent = student;
+                // Set flag updating tu true to indicate in Update Mode
+                setState(() {
+                  _isUpdating = true;
+                });
+              }),
+
+              DataCell(Text(student.lastName2.toUpperCase()),
+              onTap: (){
+                _showValues(student);
+                // Set the selected student to update
+                _selectStudent = student;
+                // Set flag updating tu true to indicate in Update Mode
+                setState(() {
+                  _isUpdating = true;
+                });
+              }),
+
+              DataCell(Text(student.email.toUpperCase()),
+              onTap: (){
+                _showValues(student);
+                // Set the selected student to update
+                _selectStudent = student;
+                // Set flag updating tu true to indicate in Update Mode
+                setState(() {
+                  _isUpdating = true;
+                });
+              }),
+
+              DataCell(Text(student.phone.toUpperCase()),
+              onTap: (){
+                _showValues(student);
+                // Set the selected student to update
+                _selectStudent = student;
+                // Set flag updating tu true to indicate in Update Mode
+                setState(() {
+                  _isUpdating = true;
+                });
+              }),
+
+              DataCell(Text(student.matricula.toUpperCase()),
+              onTap: (){
+                _showValues(student);
+                // Set the selected student to update
+                _selectStudent = student;
+                // Set flag updating tu true to indicate in Update Mode
+                setState(() {
+                  _isUpdating = true;
+                });
+              }),
+
+              /*DataCell(IconButton(icon: Icon(Icons.delete), 
+              onPressed: (){
+                _deleteData(student);
+              }
+              )),*/
+
             ]),
         ).toList(),
       ),
@@ -133,6 +273,99 @@ class homepageState extends State<homepage> {
     // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
+      //MENU LATERAL
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage("assets/imagen.jpg"),
+                      fit: BoxFit.cover
+                  )
+              ),
+              padding: EdgeInsets.all(60),
+              child: Text("   OPERATIONS:",
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.home, color: Colors.white),
+              title: Text("Home",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),
+              ),
+              onTap: () {
+                Navigator.push(context,
+                    new MaterialPageRoute(
+                        builder: (context)
+                        => new homepage()
+                    ));
+              },),
+            ListTile(
+              leading: Icon(Icons.add_to_photos, color: Colors.blue[500]),
+              title: Text("Insert Data",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),
+              ),
+              onTap: () {
+                Navigator.push(context,
+                    new MaterialPageRoute(
+                        builder: (context)
+                        => new Insert()
+                    ));
+              },),
+            ListTile(
+              leading: Icon(Icons.update, color: Colors.grey[500]),
+              title: Text("Update Data",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),),
+              onTap: () {
+                Navigator.push(context,
+                    new MaterialPageRoute(
+                        builder: (context)
+                        => new Update()
+                    ));
+              },),
+            ListTile(
+              leading: Icon(Icons.delete_forever, color: Colors.cyan[500]),
+              title: Text("Delete Data",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),
+              ),
+              onTap: () {
+                Navigator.push(context,
+                    new MaterialPageRoute(
+                        builder: (context)
+                        => new Delete()
+                    ));
+              },),
+            ListTile(
+              leading: Icon(Icons.person, color: Colors.grey[300]),
+              title: Text("Select Data",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                ),
+              ),
+              onTap: () {}
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         title: Text("MySQL remote BD Operations"),
         actions: <Widget>[
@@ -142,84 +375,84 @@ class homepageState extends State<homepage> {
               BDConnections.createTable();
             },),
           IconButton(
-            icon: Icon(Icons.update),
+            icon: Icon(Icons.refresh),
             onPressed: (){
-              refreshList();
+              BDConnections.selectData();
             },)
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+      body: Container(
+        child: Column(
           children: <Widget>[
-            DrawerHeader(
-              padding: EdgeInsets.zero,
-              child: Center(
-                child: Text(
-                  "MENU",
-                  style: TextStyle(color: Colors.blue, fontSize: 25),
+            /*Container(
+              child: Column(children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(20),
+                  child: TextField(controller: _firstnameConroller,
+                  decoration: InputDecoration.collapsed(hintText: "First Name"),),
                 ),
+                Padding(
+                    padding: EdgeInsets.all(20),
+                    child: TextField(controller: _lastname1Conroller,
+                      decoration: InputDecoration.collapsed(hintText: "Last Name 1"),)
+                ),
+                Padding(
+                    padding: EdgeInsets.all(20),
+                    child: TextField(controller: _lastname2Conroller,
+                      decoration: InputDecoration.collapsed(hintText: "Last Name 2"),)
+                ),
+                Padding(
+                    padding: EdgeInsets.all(20),
+                    child: TextField(controller: _emailConroller,
+                      decoration: InputDecoration.collapsed(hintText: "E-mail"),)
+                ),
+                Padding(
+                    padding: EdgeInsets.all(20),
+                    child: TextField(controller: _phoneConroller,
+                      decoration: InputDecoration.collapsed(hintText: "Phone"),)
+                ),
+                Padding(
+                    padding: EdgeInsets.all(20),
+                    child: TextField(controller: _matriculaConroller,
+                      decoration: InputDecoration.collapsed(hintText: "Matricula"),)
+                ),
+                //ADD AN UPDATE BUTTON AND A CANCEL BUTTON
+                //SHOW ONLY WHEN UPDATING DATA
+                _isUpdating ?
+                new Row(
+                  children: <Widget>[
+                    OutlineButton(
+                      child: Text('UPDATE'),
+                      onPressed: (){
+                        _updateData(_selectStudent);
+                      },
+                    ),
+                    OutlineButton(
+                      child: Text('CANCEL'),
+                      onPressed: (){
+                        setState(() {
+                          _isUpdating = false;
+                        });
+                        _clearValues();
+                      },
+                    ),
+                  ],
+                ):Container(),
+               ],
               ),
-              decoration: BoxDecoration(color: Colors.white),
-            ),
-            ListTile(
-              leading: Icon(Icons.add, color: Colors.blue),
-              title: Text('INSERTAR DATOS'),
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => insert()));
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.update, color: Colors.blue),
-              title: Text('ACTUALIZAR DATOS'),
-             /* onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Update()));
-              },*/
-            ),
-            ListTile(
-              leading: Icon(Icons.search, color: Colors.blue),
-              title: Text('BUSCAR DATOS'),
-             /* onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Select()));
-              },*/
-            ),
-            ListTile(
-              leading: Icon(Icons.refresh, color: Colors.blue),
-              title: Text('CONSULTAR REGISTROS'),
-             /* onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => busqueda()));
-              },*/
-            ),
-            ListTile(
-              leading: Icon(Icons.delete, color: Colors.blue),
-              title: Text('ELIMINAR DATOS'),
-             /* onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => eliminar()));
-              },*/
+            ),*/
+            Expanded(
+              child: _body(),
             ),
           ],
         ),
       ),
-      body: new Container(
-        child: new Column(
-          children: <Widget>[
-            _body(),
-          ],
-        ),
-      ),
+      /*floatingActionButton: FloatingActionButton(
+        onPressed: (){
+          _insertData();
+        },
+        child: Icon(Icons.add),
+      ),*/
     );
-  }
-
-  _snack(BuildContext context, String texto) {
-    final snackbar = SnackBar(
-      content: new Text(texto),
-      backgroundColor: Colors.deepPurple,
-    );
-    _scaffoldkey.currentState.showSnackBar(snackbar);
   }
 }
